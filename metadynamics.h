@@ -1,3 +1,8 @@
+// #######################################################################################
+// Provides public methods to update the bias potential and perform a modified (biased)
+// Langevin step
+// #######################################################################################
+
 #pragma once
 #include <stdlib.h>
 #include <math.h>
