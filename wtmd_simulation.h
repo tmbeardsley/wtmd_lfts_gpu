@@ -1,3 +1,8 @@
+// #######################################################################################
+// Main setup and loops for performing well-tempered metadynamics on a
+// diblock copolymer field-theoretic simulation
+// #######################################################################################
+
 #pragma once
 #include <stdlib.h>
 #include <cuda.h>
