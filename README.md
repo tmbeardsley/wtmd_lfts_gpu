@@ -1,7 +1,7 @@
 # wtmd_lfts_gpu
 Well-tempered metadynamics applied to Langevin field-theoretic simulations of diblock copolymers on the GPU
 
-See https://tbeardsley.com/projects/lfts/wtmd for a detailed discussion of this project.<br>
+See https://www.tbeardsley.com/projects/lfts/wtmd for a detailed discussion of this project.<br>
 
 <b>comp.sh:</b><br>
 An example compile script
