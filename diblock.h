@@ -23,7 +23,7 @@ __global__ void prepare_h(double *h, double *w_gpu, const int N, const int M)
 	else h[tid] = exp(-(-wm[tid-M]+wp[tid-M])/N);
 }
 
-// Normalise concentrations phi-(r) and phi+(r): w_gpu+2*M -> phim[0],  w_gpu+3*M -> phip[0].
+// Normalise concentrations phi-(r) and phi+(r): w_gpu+2*M -> phim[0],  w_gpu+3*M -> phip[0]
 __global__ void normalize_phi(double *w_gpu, double *h, const double Q, const double N, const int M)
 {
     double *phiA=h, *phiB=h+M, *hA=h, *hB=h+M;
@@ -54,27 +54,31 @@ __global__ void sum_phi(double *phi_gpu, double *q1_gpu, double *q2_gpu, const i
 class diblock {
 
     // Diblock-specific variables
-    int TpB_;                       // GPU threads per block (default: 512)
-    int NA_;                        // Length of polymer A-block
-    int N_;                         // Total polymer length
-    int M_;                         // Total number of field mesh points
+    int TpB_;
     double *qr_gpu_;                // Pointer to GPU memory for propagators: q_{i}(r) and q^_{N+1-i}(r) are contigious in memory
     double *h_gpu_;                 // Pointer to GPU memory for hA(r) and hB(r)
     double **q1_;                   // Array of pointers to q_{j=i}(r), where j is the monomer index and i is array index
     double **q2_;                   // Array of pointers to q^_{j=N+1-i}(r), where j is the monomer index and i is array index
     step *Step_;                    // Step object to get propagators for the next monomer
 
+    // Simulation constants derived from the input file (see lfts_params.h for details)
+    int M_;
+    int NA_;
+    int N_;
+
+
     public:
         // Constructor
-        diblock(int NA, int _NB, int M, int _Mk, int *_m, double *_L, int TpB=512) {
+        diblock(int NA, int NB, int *m, double *L, int M, int Mk, int TpB=512) {
             TpB_ = TpB;
-            NA_ = NA;
-            N_ = NA_ + _NB;
+
             M_ = M;
+            NA_ = NA;
+            N_ = NA+NB;
 
             // Allocate gpu memory for h_gpu_ and qr_gpu_
-            GPU_ERR(cudaMalloc((void**)&h_gpu_,2*M_*sizeof(double)));
-            GPU_ERR(cudaMalloc((void**)&qr_gpu_,2*(N_+1)*M_*sizeof(double)));
+            GPU_ERR(cudaMalloc((void**)&h_gpu_,2*M*sizeof(double)));
+            GPU_ERR(cudaMalloc((void**)&qr_gpu_,2*(N_+1)*M*sizeof(double)));
 
             // Allocate arrays of pointers for q_{j=1...N}(r) and q^_{j=1...N}(r)
             q1_ = new double* [N_+1];
@@ -83,12 +87,12 @@ class diblock {
             // Assign pointers such that q_{1}(r) and q_{N}(r) are in contigious memory,
             // as are q_{2}(r) and q_{N-1}(r), q_{3}(r) and q_{N-2}(r)... etc. (required for cufftPlanMany())
             for (int i=1; i<=N_; i++) {
-                q1_[i] = qr_gpu_ + 2*i*M_;
-                q2_[N_+1-i] = qr_gpu_ + (2*i+1)*M_;
+                q1_[i] = qr_gpu_ + 2*i*M;
+                q2_[N_+1-i] = qr_gpu_ + (2*i+1)*M;
             }
 
             // New step object containing methods to get next monomer's propagators
-            Step_ = new step(_m, _L, NA_, _NB, _Mk, M_);
+            Step_ = new step(NA, NB, m, L, M, Mk, TpB);
         }
 
 
@@ -120,7 +124,6 @@ class diblock {
             for (i=NA_+1; i<=N_; i++) sum_phi<<<(M_+TpB_-1)/TpB_, TpB_>>>(phiB_gpu, q1_[i], q2_[i], M_);
             normalize_phi<<<(M_+TpB_-1)/TpB_, TpB_>>>(w_gpu, h_gpu_, Q, N_, M_);
 
-            // Return ln(Q)
             return log(Q);
         }
 

@@ -4,7 +4,6 @@
 
 #pragma once
 #include <cuda.h>
-#include "GPUerror.h"
 
 // Set all elements of array, a, to the constant b
 __global__ void Array_init(double *a, const double b, int const M)
