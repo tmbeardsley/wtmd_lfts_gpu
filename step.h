@@ -34,41 +34,41 @@ __global__ void Mult_self(double *a, const double *b, int const M)
 class step {
     // Step-specific variables
     int TpB_;                           // GPU threads per block (default: 512)
-    int M_;                             // Total number of field mesh points
-    int Mk_;                            // Total number of field mesh points in k-space
-    int NA_;                            // Length of polymer A-block
-    int NB_;                            // Length of polymer B-block
-    int *m_;                            // Number of mesh points [mx,my,mz]
 
     double *g_gpu_;                     // Bond potential Boltzmann weight, Fourier transformed and /M_ on the GPU
     cufftDoubleComplex *qk_gpu_;        // Fourier transforms of q1 and q2 on the GPU (for cufftPlanMany())
     cufftHandle qr_to_qk_;              // cufft plan to transform q1[r] and q2[r] to k-space
     cufftHandle qk_to_qr_;              // cufft plan to transform q1[k] and q2[k] to real-space
 
+    // Simulation constants derived from the input file (see lfts_params.h for details)
+    int NA_;
+    int NB_;
+    int *m_;
+    int M_;
+    int Mk_;
+
     public:
         // Constructor
-        step(int *m, double *_L, int NA, int NB, int Mk, int M, int TpB=512) {
+        step(int NA, int NB, int *m, double *L, int M, int Mk, int TpB=512) {
             TpB_ = TpB;
-            M_ = M;
-            Mk_ = Mk;
             NA_ = NA;
             NB_ = NB;
+
             m_ = new int[3];
             for (int i=0; i<3; i++) m_[i] = m[i];
 
-            // Allocate memory for g on cpu and calculate it
-            double *g = new double[Mk_];
-            calc_g(g, _L);
+            M_ = M;
+            Mk_ = Mk;
 
             // Allocate memory for g_gpu and copy g from the host. 
             // g_gpu_ contains two copies of g[] so that q1[k] and q2[k] can be multiplied on the GPU at the same time
-            GPU_ERR(cudaMalloc((void**)&g_gpu_,2*Mk_*sizeof(double)));
-            GPU_ERR(cudaMemcpy(g_gpu_,g,Mk_*sizeof(double),cudaMemcpyHostToDevice));
-            GPU_ERR(cudaMemcpy(g_gpu_+Mk_,g,Mk_*sizeof(double),cudaMemcpyHostToDevice));
-            delete[] g;
+            GPU_ERR(cudaMalloc((void**)&g_gpu_,2*Mk*sizeof(double)));
+
+            // Calculate the lookup table for g (copied to gpu in function for box move to be added later)
+            update_g_lookup(L);
 
             // Allocate memory for q1[k] and q2[k], stored in contigious memory
-            GPU_ERR(cudaMalloc((void**)&qk_gpu_,2*Mk_*sizeof(cufftDoubleComplex)));
+            GPU_ERR(cudaMalloc((void**)&qk_gpu_,2*Mk*sizeof(cufftDoubleComplex)));
 
             // Configure cufft plans. cufftPlanMany used for batched processing
             GPU_ERR(cufftPlanMany(&qr_to_qk_,3,m_,NULL,1,0,NULL,1,0,CUFFT_D2Z,2));
@@ -106,31 +106,36 @@ class step {
             GPU_ERR(cudaFree(g_gpu_));
             GPU_ERR(cudaFree(qk_gpu_));
             delete[] m_;
+
         }
 
 
     private:
         // Calculate the Boltzmann weight of the bond potential in k-space, _g[k]
-        void calc_g(double *g, double *_L) {
-            int K0, K1, k;
+        void update_g_lookup(double *L) {
+            int K0, K1, k, N=NA_+NB_;
             double K, kx_sq, ky_sq, kz_sq;
+            double *g = new double[Mk_];
 
             for (int k0=-(m_[0]-1)/2; k0<=m_[0]/2; k0++) {
                 K0 = (k0<0)?(k0+m_[0]):k0;
-                kx_sq = k0*k0/(_L[0]*_L[0]);
+                kx_sq = k0*k0/(L[0]*L[0]);
 
                 for (int k1=-(m_[1]-1)/2; k1<=m_[1]/2; k1++) {
                     K1 = (k1<0)?(k1+m_[1]):k1;
-                    ky_sq = k1*k1/(_L[1]*_L[1]);
+                    ky_sq = k1*k1/(L[1]*L[1]);
 
                     for (int k2=0; k2<=m_[2]/2; k2++) {
-                        kz_sq = k2*k2/(_L[2]*_L[2]);
+                        kz_sq = k2*k2/(L[2]*L[2]);
                         k = k2 + (m_[2]/2+1)*(K1+m_[1]*K0);
                         K = 2*M_PI*pow(kx_sq+ky_sq+kz_sq,0.5); 
-                        g[k] = exp(-K*K/(6*(NA_+NB_)))/M_; 
+                        g[k] = exp(-K*K/(6.0*N))/M_; 
                     }
                 }
             }
+            GPU_ERR(cudaMemcpy(g_gpu_,g,Mk_*sizeof(double),cudaMemcpyHostToDevice));
+            GPU_ERR(cudaMemcpy(g_gpu_+Mk_,g,Mk_*sizeof(double),cudaMemcpyHostToDevice));
+            delete[] g;
         }
 
 };
