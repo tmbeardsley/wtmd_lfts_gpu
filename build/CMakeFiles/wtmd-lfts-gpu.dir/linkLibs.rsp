@@ -1,1 +1,0 @@
- "/usr/local/cuda-12.6/targets/x86_64-linux/lib/libcufft.so" "/usr/lib/x86_64-linux-gnu/libgsl.so" "/usr/local/cuda-12.6/targets/x86_64-linux/lib/libcurand.so" "/usr/lib/x86_64-linux-gnu/libgslcblas.so" -lcudadevrt -lcudart_static -lrt -lpthread -ldl 
