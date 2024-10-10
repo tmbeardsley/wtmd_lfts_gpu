@@ -4,7 +4,7 @@ See https://www.tbeardsley.com/projects/lfts/wtmd for a detailed discussion of t
 
 ## Required Dependencies:
 GSL - GNU Scientific Library (https://www.gnu.org/software/gsl/)<br>
-FFTW3 Fast Fourier Transform Library (https://www.fftw.org/)<br>
+CUDA Toolkit (https://developer.nvidia.com/cuda-toolkit/)<br>
 
 ## Compiling:
 Two methods of compiling the program are available:<br>
