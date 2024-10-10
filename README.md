@@ -69,17 +69,19 @@ Line 1: <em>ell kc sigma_Psi DT Psi_min mPsi dPsi update_freq read_bias</em><br>
 Lines 2->(mPsi+1): Psi u(Psi) up(Psi) I0(Psi) I1(Psi)<br>
 
 #### Parameter Descriptions
-<em>ell</em> is the constant, l, used in the definition of the order parameter (double).<br>
-<em>kc</em> is the wavevector cutoff (constant) in order parameter (double).<br>
-<em>sigma_Psi</em> is the width of Gaussians added to the bias potential (double).<br>
-<em>DT</em> controls the rate at which the amplitude of Guassians is reduced (double).<br>
-<em>Psi_min</em> is the lowest value of Psi for which the bias potential is collected (double).<br>
-<em>mPsi</em> is the total number of mesh points covering the range of Psi being investigated (integer).<br>
-<em>dPsi</em> is the distance between adjacent mesh points in Psi (double).<br>
-<em>update_freq</em> is the number of Langevin steps between updates of the bias potential (integer).<br>
-<em>read_bias</em> is a flag indicating whether an initial bias potential should be read from file (read_bias=1) or not (read_bias=0) (integer).
-<br><br>
-Lines 2->(mPsi+1) are only read if read_bias=1, otherwise the bias potential starts with all elements equal to zero.<br>
+| Parameter | Type | Description |
+| :---: | :---: | --- |
+| <em>ell</em> | Double | Constant, l, used in the definition of the order parameter |
+| <em>kc</em> | Double | Wavevector cutoff (constant) in order parameter |
+| <em>sigma_Psi</em> | Double | Width of Gaussians added to the bias potential |
+| <em>DT</em> | Double | Rate at which the amplitude of Guassians is reduced |
+| <em>Psi_min</em> | Double | Lowest value of Psi for which the bias potential is collected |
+| <em>mPsi</em> | Integer | Total number of mesh points covering the range of Psi being investigated |
+| <em>dPsi</em> | Double | Distance between adjacent mesh points in Psi |
+| <em>update_freq</em> | Integer | Number of Langevin steps between updates of the bias potential |
+| <em>read_bias</em> | Integer | Flag indicating whether an initial bias potential should be read from file (read_bias=1) or not (read_bias=0) |
+
+Note: Lines 2->(mPsi+1) are only read if read_bias=1, otherwise the bias potential starts with all elements equal to zero.<br>
 
 ## Output Files
 #### w_eq_<step_number>
