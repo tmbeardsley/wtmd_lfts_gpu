@@ -63,7 +63,7 @@ Note: A real-space position r = (x,y,z) corresponds to a mesh point position r_m
 | <em>n_smpl</em> | Integer | Number of steps between samples being taken in the statistics period |
 | <em>save_freq</em> | Integer | Number of steps between saving outputs to file |
 | <em>loadType</em> | Integer | Whether to load the W-(r) and w+(r) fields from the proceeding file lines (loadType=1), start from a disordered state (loadType=0) or start from a (300) lamellar phase (loadType=2) |
-| M | Integer | Total number of mesh points (M = mx\*my\*mz), such that the proceeding 2*M lines of the file can hold W-(r) and w+(r) fields to load |
+| <em>M</em> | Integer | Total number of mesh points (M = mx\*my\*mz), such that the proceeding 2*M lines of the file can hold W-(r) and w+(r) fields to load |
 
 ### 4b. Bias Field Input File
 
@@ -96,8 +96,18 @@ The state of the W-(r) and w+(r) fields at simulation step number <step_number> 
 #### phi_eq_<step_number>
 The state of the phi-(r) and phi+(r) fields at simulation step number <step_number> during the equilibration period.<br>
 
-#### phi_eq_<step_number>
+#### phi_st_<step_number>
 The state of the phi-(r) and phi+(r) fields at simulation step number <step_number> during the statistics gathering period.<br>
 
 #### bias_st_<step_number>
 Output file in the same format as the WTMD input file, containing the current state of the bias potential after step_number Langevin steps in the statistics gathering phase.
+
+## 6. Visualisation Script
+The tools folder in the root directory contains a simple script for taking the first <em>M</em> lines of a w_<..>_<step_number> or phi_<..>_<step_number> output file from the simulation, and creating a .vtk file that can be loaded into <a href="https://www.paraview.org" target="_blank">Paraview</a> for visualisation as a volume plot. Note that the first <em>M</em> lines are used as they correspond to the W-(r) or phi-(r) fields, which are usually the ones of interest. The script could easily be edited to use lines <em>M</em>+1 to 2<em>M</em> in order to plot w+(r) or phi+(r) instead.
+
+### 6a. How to use make_vtk.sh
+The script can be run from the command line as follows:<br><br>
+<b>sh make_vtk.sh \<path_to_file_to_visualise\> \<mx\> \<my\> \<mz\></b>
+<br><br>
+where <em>mx</em>, <em>my</em> and <em>mz</em> are the number of grid points in the x, y and z-dimensions of the file being visualised. 
+The script's output file name will be the same as \<path_to_file_to_visualise\>, but with a .vtk extension.
