@@ -5,11 +5,11 @@
 ## 1. Description
 See https://www.tbeardsley.com/projects/lfts/wtmd for a detailed discussion of this project.<br>
 
-## Required Dependencies:
+## 2. Required Dependencies:
 GSL - GNU Scientific Library (https://www.gnu.org/software/gsl/)<br>
 CUDA Toolkit (https://developer.nvidia.com/cuda-toolkit/)<br>
 
-## 2. Compiling:
+## 3. Compiling:
 Two methods of compiling the program are available:<br>
 <ol>
   <li><b>comp.sh</b>
@@ -28,15 +28,15 @@ Two methods of compiling the program are available:<br>
   </li>
 </ol>
 
-## 3. Running the program
+## 4. Running the program
 After compilation the executable file, wtmd-lfts-gpu, resides in the 'build' directory. Two input files are required and must be supplied to the executable at the command line. The first specifies the standard parameters and input fields for a Langevin field-theoretic simulation (L-FTS). The second specifies parameters and input potentials related specifically to performing well-tempered metadynamics (WTMD). Examples of these two files are contained in the 'input_files' folder. 
 For example, from the top level of the directory tree the program could be run via: <br><br>
 <b>./build/wtmd-lfts-gpu ./input_files/input ./input_files/bias_in</b>
 
-## 4. Input Files
+## 5. Input Files
 The input_files directory contains example input files that can be supplied to the program from the command line.
 
-### 4a. L-FTS Input file
+### 5a. L-FTS Input file
 
 #### File Format
 Line 1: <em>N NA XN C Ndt isXeN</em><br>
@@ -65,7 +65,7 @@ Note: A real-space position r = (x,y,z) corresponds to a mesh point position r_m
 | <em>loadType</em> | Integer | Whether to load the W-(r) and w+(r) fields from the proceeding file lines (loadType=1), start from a disordered state (loadType=0) or start from a (300) lamellar phase (loadType=2) |
 | <em>M</em> | Integer | Total number of mesh points (M = mx\*my\*mz), such that the proceeding 2*M lines of the file can hold W-(r) and w+(r) fields to load |
 
-### 4b. Bias Field Input File
+### 5b. Bias Field Input File
 
 #### File Format
 Line 1: <em>ell kc sigma_Psi DT Psi_min mPsi dPsi update_freq read_bias</em><br>
@@ -86,7 +86,7 @@ Lines 2->(mPsi+1): Psi u(Psi) up(Psi) I0(Psi) I1(Psi)<br>
 
 Note: Lines 2->(mPsi+1) are only read if read_bias=1, otherwise the bias potential starts with all elements equal to zero.<br>
 
-## 5. Output Files
+## 6. Output Files
 #### w_eq_<step_number>
 The state of the W-(r) and w+(r) fields at simulation step number <step_number> during the equilibration period. First three lines are simulation parameters so it can be used as an input file.<br>
 
@@ -102,10 +102,10 @@ The state of the phi-(r) and phi+(r) fields at simulation step number <step_numb
 #### bias_st_<step_number>
 Output file in the same format as the WTMD input file, containing the current state of the bias potential after step_number Langevin steps in the statistics gathering phase.
 
-## 6. Visualisation Script
+## 7. Visualisation Script
 The tools folder in the root directory contains a simple script for taking the first <em>M</em> lines of a w_<..>_<step_number> or phi_<..>_<step_number> output file from the simulation, and creating a .vtk file that can be loaded into <a href="https://www.paraview.org" target="_blank">Paraview</a> for visualisation as a volume plot. Note that the first <em>M</em> lines are used as they correspond to the W-(r) or phi-(r) fields, which are usually the ones of interest. The script could easily be edited to use lines <em>M</em>+1 to 2<em>M</em> in order to plot w+(r) or phi+(r) instead.
 
-### 6a. How to use make_vtk.sh
+### 7a. How to use make_vtk.sh
 The script can be run from the command line as follows:<br><br>
 <b>sh make_vtk.sh \<path_to_file_to_visualise\> \<mx\> \<my\> \<mz\></b>
 <br><br>
